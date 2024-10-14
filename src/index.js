@@ -1,63 +1,88 @@
-const baseUrl = "http://localhost:3000/ramens";
 
-// Function to display all ramen images in #ramen-menu div
+// Fetch and display all ramen images
 const displayRamens = () => {
-  fetch(baseUrl)
+  fetch('http://localhost:3000/ramens')
     .then(response => response.json())
     .then(ramens => {
-      const ramenMenu = document.getElementById("ramen-menu");
+      const ramenMenu = document.getElementById('ramen-menu');
       ramens.forEach(ramen => {
         const img = document.createElement('img');
         img.src = ramen.image;
         img.alt = ramen.name;
-        img.addEventListener('click', () => handleClick(ramen));
+        img.addEventListener('click', () => handleClick(ramen, img)); // Attach click event to each image
         ramenMenu.appendChild(img);
       });
     });
 };
 
-// Function to handle click on ramen image to display ramen details
-const handleClick = (ramen) => {
-  document.querySelector('.detail-image').src = ramen.image;
-  document.querySelector('.detail-image').alt = ramen.name;
-  document.querySelector('.name').textContent = ramen.name;
-  document.querySelector('.restaurant').textContent = ramen.restaurant;
-  document.getElementById('rating-display').textContent = ramen.rating;
-  document.getElementById('comment-display').textContent = ramen.comment;
+// Update ramen details when an image is clicked
+const handleClick = (ramen, imgElement) => {
+  const ramenDetail = document.querySelector('#ramen-detail');
+  ramenDetail.querySelector('img').src = ramen.image;
+  ramenDetail.querySelector('h2').textContent = ramen.name;
+  ramenDetail.querySelector('h3').textContent = ramen.restaurant;
+  document.querySelector('#rating-display').textContent = ramen.rating;
+  document.querySelector('#comment-display').textContent = ramen.comment;
+
+  // Add a delete button event listener
+  const deleteButton = document.querySelector('#delete-ramen');
+  deleteButton.onclick = () => handleDelete(imgElement); // Pass the image element to remove from #ramen-menu
 };
 
-// Function to attach a submit listener to the new-ramen form
+// Handle ramen deletion
+const handleDelete = (imgElement) => {
+  // Remove ramen image from the #ramen-menu
+  imgElement.remove();
+
+  // Clear the ramen details section
+  const ramenDetail = document.querySelector('#ramen-detail');
+  ramenDetail.querySelector('img').src = '';
+  ramenDetail.querySelector('h2').textContent = 'Insert Name Here';
+  ramenDetail.querySelector('h3').textContent = 'Insert Restaurant Here';
+  document.querySelector('#rating-display').textContent = '';
+  document.querySelector('#comment-display').textContent = '';
+};
+
+// Add new ramen to the menu on form submission
 const addSubmitListener = () => {
   const form = document.getElementById('new-ramen');
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    
-    // Create a new ramen object from form data
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
     const newRamen = {
-      name: event.target["new-name"].value,
-      restaurant: event.target["new-restaurant"].value,
-      image: event.target["new-image"].value,
-      rating: event.target["new-rating"].value,
-      comment: event.target["new-comment"].value,
+      name: e.target['name'].value,
+      restaurant: e.target['restaurant'].value,
+      image: e.target['image'].value,
+      rating: e.target['rating'].value,
+      comment: e.target['new-comment'].value,
     };
-
-    // Add new ramen to the #ramen-menu div
+    
     const img = document.createElement('img');
     img.src = newRamen.image;
     img.alt = newRamen.name;
-    img.addEventListener('click', () => handleClick(newRamen));
+    img.addEventListener('click', () => handleClick(newRamen, img)); // Attach click event to new ramen
     document.getElementById('ramen-menu').appendChild(img);
 
-    // Reset form
+    // Clear form fields after submission
     form.reset();
   });
 };
 
-// Main function to initialize the program logic
+// Main function to start the program after DOM loads
 const main = () => {
-  displayRamens();  // Display all ramen images
-  addSubmitListener();  // Add listener for form submission
+  displayRamens(); // Fetch and display all ramen images
+  addSubmitListener(); // Add form submission listener
 };
 
-main();  // Initialize app
+main(); // Invoke the main function to start the logic
+
+// Export functions for testing
+export {
+  displayRamens,
+  addSubmitListener,
+  handleClick,
+  handleDelete,
+  main,
+};
+
+
 
